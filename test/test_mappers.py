@@ -1,55 +1,9 @@
+import json_serializer.json_serializer
+
 import pytest
-import collections
-from serializer.json.mappers import *
 
-
-def compare(x, y):
-    return collections.Counter(x) == collections.Counter(y)
-
-
-def clear_func(x, y):
-    return x + y
-
-z = 5
-
-class SimpleClass:
-
-    def __init__(self, x, y):
-        self._x = x,
-        self._y = y
-
-class TestClass(SimpleClass):
-
-
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        self._x = x,
-        self._y = y
-
-    @staticmethod
-    def static_m():
-        global z
-        clear_func(1, 2)
-
-    def class_m_2(self):
-        self.class_m()
-
-    def class_m(self):
-        print(5 + 7)
-
-def multiplier(n, d):
-    """Return a function that multiplies its argument by n/d."""
-    def multiply(x):
-        """Multiply x by n/d."""
-        return x * n / d
-    return multiply
-
-
-def side_func(x, y):
-    global z
-    z = x + y
-    t = TestClass()
-    return clear_func(x, y)
+from json_serializer.json_serializer import *
+from test.utils import *
 
 
 @pytest.mark.parametrize("test_input, expected",
@@ -116,7 +70,6 @@ def test_class_func(test_input):
     assert result['class_method_type'] is not None
 
 
-
 @pytest.mark.parametrize("test_input",
                          [
                              SimpleClass('a', 3),
@@ -131,11 +84,9 @@ def test_obj_to_dict(test_input):
     assert compare(result['instance_type']['vars'], test_input.__dict__)
 
 
-
-
 @pytest.mark.parametrize("test_input",
                          [
-                                TestClass
+                             TestClass
                          ]
                          )
 def test_class(test_input):
@@ -153,3 +104,44 @@ def test_gather_gls(test_input, expected_gls):
     result = gather_gls(test_input, test_input.__code__)
     assert len(result) == expected_gls
 
+
+@pytest.mark.parametrize("module, expected",
+                         [
+                             (json_serializer.mappers, {'module_type': 'json_serializer.mappers'}),
+                         ]
+                         )
+def test_module_to_dict(module, expected):
+    assert module_to_dict(json_serializer.mappers) == expected
+
+
+@pytest.mark.parametrize("dct",
+                         [
+                             ({'module_type': 'json_serializer.mappers'}),
+                         ]
+                         )
+def test_module_loads(dct):
+    assert dict_to_module(dct)
+
+
+@pytest.mark.parametrize("dct",
+                         [
+                             ({'module_type': 'json_serializer.not_exists'}),
+                         ]
+                         )
+def test_module_invalid_path(dct):
+    with pytest.raises(ImportError):
+        dict_to_module(dct)
+
+
+def test_collect_functions():
+    assert collect_funcs(side_func, {}).keys() == {'compare', 'clear_func', 'multiplier', 'side_func'}
+
+
+def test_invalid_object():
+    with pytest.raises(StopIteration):
+        dict_to_obj({})
+
+
+def test_invalid_cls():
+    with pytest.raises(StopIteration):
+        dict_to_class({})

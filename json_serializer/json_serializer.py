@@ -1,9 +1,8 @@
 import string
 
-from serializer.json.mappers import *
-from serializer.basic_serializer import Serializer
-
-f_found = {}
+from json_serializer.mappers import *
+from basic_serializer import Serializer
+from json_serializer.parsers import parse_symbol
 
 
 class JsonSerializer(Serializer):
@@ -16,10 +15,7 @@ class JsonSerializer(Serializer):
             return "true"
         elif obj is False:
             return "false"
-        elif obj is float("Inf"):
-            return "Infinity"
-        elif obj is float("-Inf"):
-            return "-Infinity"
+
         elif obj is float("NaN"):
             return "NaN"
         elif isinstance(obj, (int, float)):
@@ -41,7 +37,8 @@ class JsonSerializer(Serializer):
         elif inspect.isfunction(obj):
             res = self._dumps_dict(function_to_dict(obj))
             return res
-
+        elif inspect.ismodule(obj):
+            return self._dumps_dict(module_to_dict(obj))
         elif inspect.isclass(obj):
             return self._dumps_dict(class_to_dict(obj))
         elif is_simple_object(obj):
@@ -86,12 +83,29 @@ class JsonSerializer(Serializer):
     def dumps(self, obj) -> string:
         return self._dumps(obj)
 
+    def loads(self, data: string):
+        idx = 0
 
-        """
-        elif isinstance(obj, staticmethod):
-            res = self._dumps_dict(static_method_to_dict(obj))
-            return res
-        elif isinstance(obj, classmethod):
-            res = self._dumps_dict(class_method_to_dict(obj))
-            return res
-        """
+        while data[idx] in (" ", "\n", "\t"):
+            idx += 1
+        obj, idx = parse_symbol(data, idx)
+
+        return obj
+
+    def dump(self, obj, filename: string):
+        with open(filename, 'w') as f:
+            f.write(self.dumps(obj))
+
+    def load(self, filename: string):
+        with open(filename, 'r') as f:
+            return self.loads(f.read())
+
+
+"""
+elif isinstance(obj, staticmethod):
+    res = self._dumps_dict(static_method_to_dict(obj))
+    return res
+elif isinstance(obj, classmethod):
+    res = self._dumps_dict(class_method_to_dict(obj))
+    return res
+"""
