@@ -1,7 +1,6 @@
 import inspect
 import types
 
-f_found = {}
 
 BUILTIN_TYPES = (
     set,
@@ -29,39 +28,6 @@ def tuple_to_dict(obj):
 
 def cell_to_dict(obj):
     return {"cell_type": obj.cell_contents}
-
-
-def gather_gls(obj, obj_code):
-    global f_found
-    f_found[obj] = True
-    vars_global = {}
-    for var in obj_code.co_names:
-        try:
-            if inspect.isclass(obj.__globals__[var]):
-                vars_global[var] = class_to_dict(obj.__globals__[var])
-
-            elif inspect.isfunction(obj.__globals__[var]):
-                if obj.__globals__[var] not in f_found:
-                    vars_global[var] = function_to_dict(obj.__globals__[var])
-            elif isinstance(obj.__globals__[var], staticmethod):
-                if obj.__globals__[var].__func__ not in f_found:
-                    vars_global[var] = static_method_to_dict(obj.__globals__[var])
-            elif isinstance(obj.__globals__[var], classmethod):
-                if obj.__globals__[var].__func__ not in f_found:
-                    vars_global[var] = class_method_to_dict(obj.__globals__[var])
-
-            elif is_simple_object(obj.__globals__[var]):
-                vars_global[var] = object_to_dict(obj.__globals__[var])
-            elif isinstance(obj.__globals__[var], BUILTIN_TYPES):
-                vars_global[var] = obj.__globals__[var]
-
-        except KeyError:
-            pass
-
-    for var in obj_code.co_consts:
-        if isinstance(var, types.CodeType):
-            vars_global.update(gather_gls(obj, var))
-    return vars_global
 
 
 def is_simple_object(obj):
@@ -156,3 +122,38 @@ def code_to_dict(obj):
             "co_cellvars": obj.co_cellvars,
         }
     }
+
+
+f_found = {}
+
+
+def gather_gls(obj, obj_code):
+    global f_found
+    f_found[obj] = True
+    vars_global = {}
+    for var in obj_code.co_names:
+        try:
+            if inspect.isclass(obj.__globals__[var]):
+                vars_global[var] = class_to_dict(obj.__globals__[var])
+
+            elif inspect.isfunction(obj.__globals__[var]):
+                if obj.__globals__[var] not in f_found:
+                    vars_global[var] = function_to_dict(obj.__globals__[var])
+            elif isinstance(obj.__globals__[var], staticmethod):
+                if obj.__globals__[var].__func__ not in f_found:
+                    vars_global[var] = static_method_to_dict(obj.__globals__[var])
+            elif isinstance(obj.__globals__[var], classmethod):
+                if obj.__globals__[var].__func__ not in f_found:
+                    vars_global[var] = class_method_to_dict(obj.__globals__[var])
+            elif is_simple_object(obj.__globals__[var]):
+                vars_global[var] = object_to_dict(obj.__globals__[var])
+            elif isinstance(obj.__globals__[var], BUILTIN_TYPES):
+                vars_global[var] = obj.__globals__[var]
+
+        except KeyError:
+            pass
+
+    for var in obj_code.co_consts:
+        if isinstance(var, types.CodeType):
+            vars_global.update(gather_gls(obj, var))
+    return vars_global

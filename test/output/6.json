@@ -1,0 +1,1 @@
+{ "instance_type": { "class": { "class_type": { "name": "TestClass", "bases": { "tuple_type": [{ "class_type": { "name": "SimpleClass", "bases": { "tuple_type": [] }, "dict": { "__doc__": null } } }] }, "dict": { "__doc__": null } } }, "vars": { "_x": { "tuple_type": [3] }, "_y": 7 } } }

@@ -1,6 +1,6 @@
 import string
 
-from mappers import *
+from serializer.json.mappers import *
 from serializer.basic_serializer import Serializer
 
 f_found = {}
@@ -29,36 +29,31 @@ class JsonSerializer(Serializer):
         elif isinstance(obj, str):
             return '"' + obj.replace("\\", "\\\\").replace('"', '\\"') + '"'
         elif isinstance(obj, set):
-            return self.dumps_dict(set_to_dict(obj))
+            return self._dumps_dict(set_to_dict(obj))
         elif isinstance(obj, frozenset):
-            return self.dumps_dict(frozenset_to_dict(obj))
+            return self._dumps_dict(frozenset_to_dict(obj))
         elif isinstance(obj, tuple):
-            return self.dumps_dict(tuple_to_dict(obj))
+            return self._dumps_dict(tuple_to_dict(obj))
         elif isinstance(obj, list):
-            return self.dumps_list(obj)
+            return self._dumps_list(obj)
         elif isinstance(obj, dict):
-            return self.dumps_dict(obj)
+            return self._dumps_dict(obj)
         elif inspect.isfunction(obj):
-            res = self.dumps_dict(function_to_dict(obj))
+            res = self._dumps_dict(function_to_dict(obj))
             return res
-        elif isinstance(obj, staticmethod):
-            res = self.dumps_dict(static_method_to_dict(obj))
-            return res
-        elif isinstance(obj, classmethod):
-            res = self.dumps_dict(class_method_to_dict(obj))
-            return res
+
         elif inspect.isclass(obj):
-            return self.dumps_dict(class_to_dict(obj))
+            return self._dumps_dict(class_to_dict(obj))
         elif is_simple_object(obj):
-            return self.dumps_dict(object_to_dict(obj))
+            return self._dumps_dict(object_to_dict(obj))
         elif isinstance(obj, types.CodeType):
-            return self.dumps_dict(code_to_dict(obj))
+            return self._dumps_dict(code_to_dict(obj))
         elif isinstance(obj, types.CellType):
-            return self.dumps_dict(cell_to_dict(obj))
+            return self._dumps_dict(cell_to_dict(obj))
         else:
             raise TypeError()
 
-    def dumps_list(self, obj):
+    def _dumps_list(self, obj):
         if not len(obj):
             return "[]"
         res = "["
@@ -73,15 +68,15 @@ class JsonSerializer(Serializer):
         )
         return res
 
-    def dumps_dict(self, obj):
+    def _dumps_dict(self, obj):
         if not len(obj):
             return "{}"
 
-        res = "{"
+        res = "{ "
         keys = list(obj)
         for i in keys[:-1]:
             res += (
-                    '"' + str(i) + '": ' + self._dumps(obj[i]) + ","
+                    '"' + str(i) + '": ' + self._dumps(obj[i]) + ", "
             )
         res += (
             f'"{str(keys[-1])}": {self._dumps(obj[keys[-1]])} }}'
@@ -92,15 +87,11 @@ class JsonSerializer(Serializer):
         return self._dumps(obj)
 
 
-class PPP:
-    def __init__(self):
-        self.i = 8
-
-    def kokoko(self, buka):
-        print(buka + "LIZA")
-        self.i += 3
-        return self.i
-
-
-LIZA = JsonSerializer()
-print(LIZA.dumps(PPP))
+        """
+        elif isinstance(obj, staticmethod):
+            res = self._dumps_dict(static_method_to_dict(obj))
+            return res
+        elif isinstance(obj, classmethod):
+            res = self._dumps_dict(class_method_to_dict(obj))
+            return res
+        """
