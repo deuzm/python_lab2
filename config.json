@@ -1,0 +1,6 @@
+{
+  "input-format": "pickle",
+  "input-file": "test.pickle",
+  "output-format": "json",
+  "output-file": "test.json"
+}
