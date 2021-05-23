@@ -17,6 +17,6 @@ class Serializer:
         pass
 
     @abstractmethod
-    def loads(self, date: string):
+    def loads(self, data: string):
         pass
 

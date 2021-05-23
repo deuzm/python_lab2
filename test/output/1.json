@@ -1,1 +1,0 @@
-          { "number": 3, "float_number": 4.3, "nul": null, "str": "test", "tuple": { "tuple_type": [1,3,7] }, "set": { "set_type": [1,4,5] }, "empty": {}, "empty_t": { "tuple_type": [] }, "bool": true, "bool2": false, "flt_inf": inf, "flt_inf2": -inf, "flt_nan": nan }
